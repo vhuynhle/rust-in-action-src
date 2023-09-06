@@ -1,5 +1,6 @@
 use rand::thread_rng;
 use rand::Rng;
+use std::fmt::Display;
 
 trait Read {
     fn read(&self, save_to: &mut Vec<u8>) -> Result<usize, String>;
@@ -9,6 +10,15 @@ trait Read {
 enum FileState {
     Open,
     Closed,
+}
+
+impl Display for FileState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            FileState::Open => write!(f, "OPEN"),
+            FileState::Closed => write!(f, "CLOSED"),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -36,6 +46,12 @@ impl File {
             data: data.to_owned(),
             ..File::new(name)
         }
+    }
+}
+
+impl Display for File {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<{} ({})>", self.name, self.state)
     }
 }
 
@@ -83,4 +99,5 @@ fn main() {
     let f3 = File::new_with_data("f3.txt", &f2.data);
     let f3 = open(f3).unwrap();
     println!("{:?}", f3);
+    println!("{}", f3);
 }
