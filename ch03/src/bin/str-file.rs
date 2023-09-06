@@ -1,11 +1,14 @@
+//! Simulating files one step at a time.
+#![allow(dead_code)]
 use rand::thread_rng;
 use rand::Rng;
 use std::fmt::Display;
 
-trait Read {
+pub trait Read {
     fn read(&self, save_to: &mut Vec<u8>) -> Result<usize, String>;
 }
 
+/// Represent the state of a file.
 #[derive(Debug)]
 pub enum FileState {
     Open,
@@ -21,6 +24,7 @@ impl Display for FileState {
     }
 }
 
+/// Represents a 'file', which probrably lives on a file system.
 #[derive(Debug)]
 struct File {
     pub name: String,
@@ -33,7 +37,8 @@ fn one_in(denominator: u32) -> bool {
 }
 
 impl File {
-    fn new(name: &str) -> Self {
+    /// Creates an empty file with a given name
+    pub fn new(name: &str) -> Self {
         File {
             name: name.to_string(),
             data: Vec::new(),
@@ -41,11 +46,22 @@ impl File {
         }
     }
 
-    fn new_with_data(name: &str, data: &[u8]) -> Self {
+    /// Creates a file with a given name and given contents
+    pub fn new_with_data(name: &str, data: &[u8]) -> Self {
         File {
             data: data.to_owned(),
             ..File::new(name)
         }
+    }
+
+    /// Returns the size of the file
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Returns the name of the file
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 
@@ -99,5 +115,5 @@ fn main() {
     let f3 = File::new_with_data("f3.txt", &f2.data);
     let f3 = open(f3).unwrap();
     println!("{:?}", f3);
-    println!("{}", f3);
+    println!("{}, len = {}", f3, f3.len());
 }
