@@ -29,3 +29,20 @@ type Message = String;
 pub struct Mailbox {
     messages: Vec<Message>,
 }
+
+fn main() {
+    let base = GroundStation {};
+    let mut sat_a = CubeSat {
+        id: 0,
+        mailbox: Mailbox { messages: vec![] },
+    };
+
+    println!("t0: {:?}", sat_a);
+
+    base.send(&mut sat_a, "Hello there!".to_string());
+    println!("t1: {:?}", sat_a);
+
+    let msg = sat_a.recv();
+    println!("msg: {:?}", msg);
+    println!("t2: {:?}", sat_a);
+}
