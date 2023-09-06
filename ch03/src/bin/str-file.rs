@@ -1,6 +1,10 @@
 use rand::thread_rng;
 use rand::Rng;
 
+trait Read {
+    fn read(&self, save_to: &mut Vec<u8>) -> Result<usize, String>;
+}
+
 #[derive(Debug)]
 enum FileState {
     Open,
@@ -33,7 +37,9 @@ impl File {
             ..File::new(name)
         }
     }
+}
 
+impl Read for File {
     fn read(&self, save_to: &mut Vec<u8>) -> Result<usize, String> {
         let mut tmp = self.data.clone();
         let read_length = tmp.len();
@@ -61,7 +67,7 @@ fn close(mut f: File) -> Result<File, String> {
 }
 
 fn main() {
-    let f2 = File::new_with_data("2.txt", &vec![114, 117, 115, 116, 33]);
+    let f2 = File::new_with_data("2.txt", &[114, 117, 115, 116, 33]);
 
     let mut buffer: Vec<u8> = vec![];
     let f2 = open(f2).unwrap();
