@@ -7,7 +7,7 @@ trait Read {
 }
 
 #[derive(Debug)]
-enum FileState {
+pub enum FileState {
     Open,
     Closed,
 }
@@ -23,9 +23,9 @@ impl Display for FileState {
 
 #[derive(Debug)]
 struct File {
-    name: String,
+    pub name: String,
     data: Vec<u8>,
-    state: FileState,
+    pub state: FileState,
 }
 
 fn one_in(denominator: u32) -> bool {
