@@ -2,9 +2,16 @@ use rand::thread_rng;
 use rand::Rng;
 
 #[derive(Debug)]
+enum FileState {
+    Open,
+    Closed,
+}
+
+#[derive(Debug)]
 struct File {
     name: String,
     data: Vec<u8>,
+    state: FileState,
 }
 
 fn one_in(denominator: u32) -> bool {
@@ -16,6 +23,7 @@ impl File {
         File {
             name: name.to_string(),
             data: Vec::new(),
+            state: FileState::Closed,
         }
     }
 
@@ -35,27 +43,25 @@ impl File {
     }
 }
 
-fn open(f: File) -> Result<File, String> {
+fn open(mut f: File) -> Result<File, String> {
     if one_in(10_000) {
         let err_msg = "Permission denied".to_string();
         return Err(err_msg);
     }
-
+    f.state = FileState::Open;
     Ok(f)
 }
 
-fn close(f: File) -> Result<File, String> {
+fn close(mut f: File) -> Result<File, String> {
     if one_in(10_000) {
         return Err("Interrupted by signal".to_string());
     }
+    f.state = FileState::Closed;
     Ok(f)
 }
 
 fn main() {
-    let f2 = File {
-        name: "2.txt".to_string(),
-        data: vec![114, 117, 115, 116, 33],
-    };
+    let f2 = File::new_with_data("2.txt", &vec![114, 117, 115, 116, 33]);
 
     let mut buffer: Vec<u8> = vec![];
     let f2 = open(f2).unwrap();
@@ -69,5 +75,6 @@ fn main() {
     println!("{}", text);
 
     let f3 = File::new_with_data("f3.txt", &f2.data);
-    println!("File name: {}", f3.name);
+    let f3 = open(f3).unwrap();
+    println!("{:?}", f3);
 }
