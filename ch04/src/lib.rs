@@ -1,2 +1,9 @@
-mod status_message;
-pub use status_message::StatusMessage;
+#[derive(Debug)]
+pub struct CubeSat {
+    pub id: u64,
+}
+
+#[derive(Debug)]
+pub enum StatusMessage {
+    Ok,
+}
