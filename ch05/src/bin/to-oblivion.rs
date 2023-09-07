@@ -6,7 +6,7 @@ fn main() {
         i += 1000;
         print!("{}..", i);
         if i % 10000 == 0 {
-            println!("");
+            println!();
         }
     }
 }
