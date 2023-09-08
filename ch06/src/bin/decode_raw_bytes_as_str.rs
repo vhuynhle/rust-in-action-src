@@ -19,4 +19,18 @@ fn main() {
     }
 
     println!("a: {}, b: {}, c: {}", a, b, c);
+
+    // A normal String is allocated and stored on heap.
+    // b is constructed from static memory, so do not (automatically) drop it here.
+    // Otherwise, the program will segfault trying to free static memory at the end of
+    // the current scope.
+    let _ = std::mem::ManuallyDrop::new(b);
+
+    // c is copy-on-write, and it is only borrowed in this case.
+    // So dropping c is ok because it does not free any memory.
+    match c {
+        Cow::Borrowed(_) => println!("c is borrowed"),
+        Cow::Owned(_) => println!("c is owned"),
+    }
+    drop(c);
 }
