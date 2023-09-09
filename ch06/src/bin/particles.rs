@@ -1,3 +1,8 @@
+use std::{
+    alloc::{GlobalAlloc, System},
+    time::Instant,
+};
+
 use graphics::{
     clear,
     math::{add, mul_scalar},
@@ -6,6 +11,27 @@ use graphics::{
 };
 use piston_window::{PistonWindow, WindowSettings};
 use rand::{rngs::ThreadRng, thread_rng, Rng};
+
+#[global_allocator]
+static ALLOCATOR: ReportingAllocator = ReportingAllocator;
+
+struct ReportingAllocator;
+
+unsafe impl GlobalAlloc for ReportingAllocator {
+    unsafe fn alloc(&self, layout: std::alloc::Layout) -> *mut u8 {
+        let start = Instant::now();
+        let ptr = System.alloc(layout);
+        let end = Instant::now();
+        let time_taken = end - start;
+        let bytes_requested = layout.size();
+        eprintln!("{},{}", bytes_requested, time_taken.as_nanos());
+        ptr
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: std::alloc::Layout) {
+        System.dealloc(ptr, layout);
+    }
+}
 
 struct Particle {
     width: f64,
