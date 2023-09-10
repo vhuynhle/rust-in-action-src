@@ -1,5 +1,6 @@
-use chrono::{DateTime, Local};
-use clap::{arg, Arg, command};
+use std::mem::zeroed;
+use chrono::{DateTime, Local, TimeZone};
+use clap::{Arg, command};
 
 struct Clock;
 
@@ -8,13 +9,26 @@ impl Clock {
         Local::now()
     }
 
-    fn set() -> ! {
-        unimplemented!()
+    #[cfg(not(windows))]
+    fn set<Tz: TimeZone>(t: DateTime<Tz>) {
+        use libc::{timeval, time_t, suseconds_t};
+        use libc::{settimeofday, timezone};
+
+        let t = t.with_timezone(&Local);
+
+        let mut u: timeval = unsafe { zeroed() }; // memset(&u, 0, sizeof(u));
+        u.tv_sec = t.timestamp() as time_t;
+        u.tv_usec = t.timestamp_subsec_micros() as suseconds_t;
+
+        unsafe {
+            let mock_tz: *const timezone = std::ptr::null();
+            settimeofday(&u as *const timeval, mock_tz);
+        }
     }
 }
 
 fn main() {
-    let matches = command!()
+    let command = command!()
         .about("Gets and sets the time")
         .version("0.1")
         .arg(Arg::new("action")
@@ -31,7 +45,8 @@ fn main() {
             .default_value("rfc3339"))
         .arg(Arg::new("datetime")
             .help("When <action> is 'set', apply <datetime>. Otherwise, ignore.")
-            .required(false)).get_matches();
+            .required(false));
+    let matches = command.clone().get_matches();
 
     let action = matches.get_one::<String>("action").unwrap();
     let std = matches.get_one::<String>("std").unwrap();
@@ -46,6 +61,27 @@ fn main() {
             println!("{}", now.to_rfc3339());
         }
     } else {
-        unimplemented!()
+        let t_ = matches.get_one::<String>("datetime");
+        if t_.is_none() {
+            let _ = command.clone().print_help();
+            std::process::exit(1);
+        }
+        let t_: &String = t_.unwrap();
+        let parser = match std.as_str() {
+            "rfc2822" => DateTime::parse_from_rfc2822,
+            "rfc3339" => DateTime::parse_from_rfc3339,
+            _ => unimplemented!()
+        };
+        let err_msg = format!("Unable to parse {} according to {}", t_, std);
+        let t = parser(t_).expect(&err_msg);
+        Clock::set(t);
+
+        let maybe_error = std::io::Error::last_os_error();
+        let os_error_code = &maybe_error.raw_os_error();
+        match os_error_code {
+            Some(error_code) if *error_code != 0 =>
+                { eprintln!("Unable to set the time: {:}", maybe_error); },
+            _ => (),
+        }
     }
 }

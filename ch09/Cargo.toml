@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.30"
 clap = { version = "4.4.2", features = ["cargo"] }
+
+[target.'cfg(not(windows))'.dependencies]
+libc = "0.2.147"
