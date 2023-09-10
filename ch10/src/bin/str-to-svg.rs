@@ -1,3 +1,6 @@
+use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelRefIterator;
+
 use svg::{
     node::element::{
         path::{Command, Data, Position},
@@ -166,7 +169,7 @@ fn generate_svg(path_data: Vec<Command>) -> Document {
 fn parse(input: &str) -> Vec<Operation> {
     input
         .as_bytes()
-        .iter()
+        .par_iter()
         .map(|&byte| match byte {
             b'0' => Home,
             b'1'..=b'9' => {
