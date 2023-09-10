@@ -54,8 +54,8 @@ impl Artist {
 
     fn forward(&mut self, distance: isize) {
         match self.heading {
-            North => self.y += distance,
-            South => self.y -= distance,
+            North => self.y -= distance,
+            South => self.y += distance,
             East => self.x += distance,
             West => self.x -= distance,
         }
