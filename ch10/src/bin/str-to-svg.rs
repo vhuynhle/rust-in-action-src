@@ -164,10 +164,10 @@ fn generate_svg(path_data: Vec<Command>) -> Document {
 /// Note: The mapping here is almost random, and doesn't have deep meaning.
 /// Other mappings can be equally valid.
 fn parse(input: &str) -> Vec<Operation> {
-    let mut steps = vec![];
-
-    for byte in input.bytes() {
-        let step = match byte {
+    input
+        .as_bytes()
+        .iter()
+        .map(|&byte| match byte {
             b'0' => Home,
             b'1'..=b'9' => {
                 let distance = (byte - b'0') as isize;
@@ -176,11 +176,8 @@ fn parse(input: &str) -> Vec<Operation> {
             b'a' | b'b' | b'c' => TurnLeft,
             b'd' | b'e' | b'f' => TurnRight,
             _ => Noop(byte),
-        };
-        steps.push(step);
-    }
-
-    steps
+        })
+        .collect()
 }
 
 fn main() {
